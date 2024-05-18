@@ -11,6 +11,12 @@ python manage.py runserver
 
 # log in into http://localhost:8000/admin username:admin password:admin
 ```
+## Test 2 endpoints
+```bash
+curl http://localhost:8000/user_contracts_information
+curl http://localhost:8000/contracts_in_2020_not_recurrent
+```
+
 
 ## Dump data to fixtures
 ```bash

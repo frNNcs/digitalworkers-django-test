@@ -1,6 +1,6 @@
 from faker import Faker
 
-from main.models import Contract, CustomUser, Payment, Product
+from main.models import Contract, CustomUser, Payment, Product, RecurrentContract
 
 
 def fake_db(delete=False):
@@ -46,3 +46,16 @@ def fake_db(delete=False):
             payment = Payment(contract=contract, amount=fake.random_int(1, 1000))
             payments.append(payment)
     payments = Payment.objects.bulk_create(payments)
+
+    # Create some recurrent contracts
+    recurrent_contracts = []
+    for contract in contracts:
+        if fake.boolean(chance_of_getting_true=10):
+            name = ""
+            if fake.boolean(chance_of_getting_true=75):
+                name += RecurrentContract.IMPORTANT_PREFIX
+            name += f"{fake.word()} {fake.word()}"
+
+            recurrent_contract = RecurrentContract(name=name, contract_id=contract.id)
+            recurrent_contracts.append(recurrent_contract)
+    RecurrentContract.objects.bulk_create(recurrent_contracts)

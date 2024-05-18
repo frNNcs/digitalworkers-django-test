@@ -85,18 +85,48 @@ class Contract(models.Model):
         verbose_name_plural = "Contracts"
         db_table = "CONTRACTS"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} - {self.product}"
+
+    @classmethod
+    def get_contracts_in_2020_not_recurrent(cls: "Contract") -> list[dict[str, str]]:
+        recurrents_ids: list[int] = (
+            RecurrentContract.objects.prefetch_related("contract")
+            .filter(
+                name__startswith=RecurrentContract.IMPORTANT_PREFIX,
+                contract__start_date__year=2020,
+            )
+            .values_list("contract_id", flat=True)
+        )
+
+        contracts = (
+            cls.objects.filter(start_date__year=2020)
+            .prefetch_related("user", "product")
+            .exclude(id__in=recurrents_ids)
+            .values_list(
+                "id",
+                "user__username",
+                "product__name",
+                "product__price",
+                "start_date",
+            )
+        )
+        return [
+            dict(zip(["id", "username", "product", "price", "start_date"], contract))
+            for contract in contracts
+        ]
 
 
 class RecurrentContract(models.Model):
-    """A recurrent contract is a contract that is renewed automatically.
+    """A recurrent contract is a contract that is commonly renewed.
 
     Args:
         contract (models.ForeignKey): The contract associated with the
         recurrent contract.
     """
 
+    IMPORTANT_PREFIX = "Jho"
+    name = models.CharField(max_length=100, null=False, blank=False)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
 
     class Meta:
@@ -105,7 +135,7 @@ class RecurrentContract(models.Model):
         db_table = "RECURRENT_CONTRACTS"
 
     def __str__(self):
-        return f"{self.contract}"
+        return f"{self.name} - {self.contract}"
 
 
 class Payment(models.Model):

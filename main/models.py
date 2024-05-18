@@ -7,12 +7,42 @@ class CustomUser(AbstractUser):
     user model.
     """
 
-    def get_contracts_information(self):
-        raw_query = """
-        SELECT main_contract.id, main_contract.start_date, main_product.name
-        """
-        contracts = Contract.objects.raw(raw_query)
-        return contracts
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+        db_table = "USERS"
+
+    @classmethod
+    def get_contracts_information(cls) -> list[dict[str, str]]:
+        """Get the contracts information of the users that joined today."""
+        contracts_information = cls.objects.raw(
+            """
+            SELECT
+                USERS.username,
+                USERS.date_joined,
+                USERS.id,
+                COUNT(CONTRACTS.id) as contract_count,
+                COUNT(DISTINCT PAYMENTS.contract_id) as contract_payed_count
+            FROM USERS
+
+            LEFT JOIN CONTRACTS ON USERS.id = CONTRACTS.user_id
+            LEFT JOIN PAYMENTS ON CONTRACTS.id = PAYMENTS.contract_id
+
+            WHERE DATE(USERS.date_joined) = CURRENT_DATE
+
+            GROUP BY USERS.id
+            order by contract_count desc
+            """
+        )
+        return [
+            dict(
+                zip(
+                    ["username", "contract_count", "contract_payed_count"],
+                    [u.username, u.contract_count, u.contract_payed_count],
+                )
+            )
+            for u in contracts_information
+        ]
 
 
 class Product(models.Model):

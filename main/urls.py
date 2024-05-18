@@ -3,5 +3,10 @@ from django.urls import path
 from .views import JSONResponseView
 
 urlpatterns = [
-    path("json/", JSONResponseView.as_view(), name="json_response"),
+    # Ejercicio 1 de la prueba técnica
+    path(
+        "user_contracts_information",
+        JSONResponseView.as_view(),
+        name="user_contracts_information",
+    ),
 ]

@@ -3,7 +3,9 @@
 from django.http import JsonResponse
 from django.views.generic import View
 
+from main.models import CustomUser
+
 
 class JSONResponseView(View):
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"foo": "bar"})
+    def get(self, *args, **kwargs):
+        return JsonResponse(CustomUser.get_contracts_information(), safe=False)

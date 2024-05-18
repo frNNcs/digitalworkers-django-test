@@ -1,5 +1,9 @@
+from typing import Union
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+from main.types import ContractsInformation2020NotRecurrent as CI2020NR
 
 
 class CustomUser(AbstractUser):
@@ -13,8 +17,19 @@ class CustomUser(AbstractUser):
         db_table = "USERS"
 
     @classmethod
-    def get_contracts_information(cls) -> list[dict[str, str]]:
-        """Get the contracts information of the users that joined today."""
+    def get_contracts_information(cls) -> list[dict[str, Union[str, int]]]:
+        """Get the contracts information of the users that joined today.
+
+        Returns:
+        [
+            {
+                "username": str,
+                "contract_count": int,
+                "contract_payed_count": int
+            },
+            ...
+        ]
+        """
         contracts_information = cls.objects.raw(
             """
             SELECT
@@ -46,7 +61,7 @@ class CustomUser(AbstractUser):
 
 
 class Product(models.Model):
-    """A product is a service that can be contracted by a user.
+    """A product is an item that can be contracted by a user.
 
     Args:
         name (models.CharField): The name of the product.
@@ -89,8 +104,8 @@ class Contract(models.Model):
         return f"{self.user} - {self.product}"
 
     @classmethod
-    def get_contracts_in_2020_not_recurrent(cls: "Contract") -> list[dict[str, str]]:
-        recurrents_ids: list[int] = (
+    def get_contracts_in_2020_not_recurrent(cls: type["Contract"]) -> list[CI2020NR]:
+        recurrents_ids = (
             RecurrentContract.objects.prefetch_related("contract")
             .filter(
                 name__startswith=RecurrentContract.IMPORTANT_PREFIX,
@@ -112,8 +127,14 @@ class Contract(models.Model):
             )
         )
         return [
-            dict(zip(["id", "username", "product", "price", "start_date"], contract))
-            for contract in contracts
+            {
+                "id": c[0],
+                "username": c[1],
+                "product": c[2],
+                "price": c[3],
+                "start_date": c[4].strftime("%Y-%m-%d"),
+            }
+            for c in contracts
         ]
 
 

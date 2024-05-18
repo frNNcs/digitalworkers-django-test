@@ -11,6 +11,11 @@ python manage.py runserver
 
 # log in into http://localhost:8000/admin username:admin password:admin
 ```
+## Test with coverage
+```bash
+coverage run --source='.' manage.py test
+```
+
 ## Test 2 endpoints
 ```bash
 curl http://localhost:8000/user_contracts_information

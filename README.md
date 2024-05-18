@@ -9,7 +9,7 @@ python manage.py migrate
 python manage.py loaddata fixtures/01_base_fixtures
 python manage.py runserver
 
-# log in into localhost:8000/admin username:admin password:admin
+# log in into http://localhost:8000/admin username:admin password:admin
 ```
 
 ## Dump data to fixtures
@@ -23,3 +23,5 @@ python manage.py dumpdata --natural-primary \
                           --exclude admin \
                           -o fixtures/01_base_fixtures.json
 ```
+
+[Requirements and resolution](./Q&A.md)

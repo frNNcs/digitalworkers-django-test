@@ -1,3 +1,9 @@
-from django.shortcuts import render
+# Create django json view
 
-# Create your views here.
+from django.http import JsonResponse
+from django.views.generic import View
+
+
+class JSONResponseView(View):
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"foo": "bar"})
